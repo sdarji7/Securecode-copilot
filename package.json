@@ -1,0 +1,62 @@
+{
+  "name": "securecode-copilot",
+  "displayName": "SecureCode Copilot",
+  "description": "VS Code extension that enriches prompts and scans code with Semgrep.",
+  "version": "0.0.2",
+  "publisher": "your-name",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Linters",
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished",
+    "onLanguage:javascript",
+    "onLanguage:typescript",
+    "onLanguage:python",
+    "onCommand:securecode.enrichPrompt"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "securecode.enrichPrompt",
+        "title": "Secure Prompt: Enrich Selected Prompt"
+      }
+    ],
+    "configuration": {
+      "title": "SecureCode Copilot",
+      "properties": {
+        "securecode.semgrepPath": {
+          "type": "string",
+          "default": "semgrep",
+          "description": "Path to Semgrep executable (use absolute path if not in PATH)."
+        },
+        "securecode.scanChangedLinesOnly": {
+          "type": "boolean",
+          "default": true,
+          "description": "If true, only emit diagnostics when the file text has changed."
+        },
+        "securecode.rulesDir": {
+          "type": "string",
+          "default": "${extensionPath}/semgrep-rules",
+          "description": "Directory containing Semgrep rules."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5",
+    "@types/node": "^20.11.30",
+    "@types/vscode": "^1.80.0",
+    "vsce": "^2.15.0"
+  }
+}
