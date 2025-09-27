@@ -53,10 +53,19 @@ function activate(context) {
     // Hooks
     context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(e => scanner.scheduleScan(e.document, 700)), vscode.workspace.onDidSaveTextDocument(doc => scanner.scheduleScan(doc, 100)));
     // Registering Code Action Provider (Quick Fixes)
+    // context.subscriptions.push(
+    //   vscode.languages.registerCodeActionsProvider('python', {
+    //     provideCodeActions: async (doc: vscode.TextDocument, range: vscode.Range) => {
+    //       const findings = await runner.scanFile(doc);
+    //       return runner.provideCodeActions(doc, range);  // Trigger code actions
+    //     }
+    //   })
+    // );
     context.subscriptions.push(vscode.languages.registerCodeActionsProvider('python', {
         provideCodeActions: async (doc, range) => {
-            const findings = await runner.scanFile(doc);
-            return runner.provideCodeActions(doc, range); // Trigger code actions
+            // Get diagnostics for this document
+            const docDiagnostics = vscode.languages.getDiagnostics(doc.uri);
+            return runner.provideCodeActions(doc, range, docDiagnostics);
         }
     }));
     // Command: Enrich Prompt

@@ -17,7 +17,7 @@ class ScanManager {
         this.channel = channel;
         this.runner = new semgrep_1.SemgrepRunner(channel);
     }
-    scheduleScan(doc, delayMs = 600) {
+    scheduleScan(doc, delayMs = 300) {
         if (doc.uri.scheme !== 'file') {
             return;
         }

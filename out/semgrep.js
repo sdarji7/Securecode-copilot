@@ -119,28 +119,50 @@ class SemgrepRunner {
         });
     }
     // Add Code Action (Quick Fixes) for hardcoded secrets
-    provideCodeActions(doc, range) {
+    // public provideCodeActions(doc: vscode.TextDocument, range: vscode.Range): vscode.CodeAction[] {
+    //   const codeActions: vscode.CodeAction[] = [];
+    //   // Hardcoded secret detection fix
+    //   const action = new vscode.CodeAction('Replace with process.env.MY_SECRET', vscode.CodeActionKind.QuickFix);
+    //   action.edit = new vscode.WorkspaceEdit();
+    //   // Get the text of the line with the hardcoded secret
+    //   const lineText = doc.getText(new vscode.Range(range.start, range.end));
+    //   // If it’s a hardcoded secret, suggest replacing it
+    //   if (lineText.includes('Bearer') || lineText.includes('API_KEY')) {
+    //     action.edit.replace(doc.uri, range, 'process.env.MY_SECRET');
+    //     codeActions.push(action);
+    //   }
+    //   // Missing authorization check fix
+    //   const authAction = new vscode.CodeAction('Add @login_required', vscode.CodeActionKind.QuickFix);
+    //   authAction.edit = new vscode.WorkspaceEdit();
+    //   // For missing auth checks in Flask routes
+    //   if (lineText.includes('@app.route') && !lineText.includes('@login_required')) {
+    //     const authDecorator = '@login_required\n';
+    //     const position = new vscode.Position(0, 0); // Add to the top of the function
+    //     authAction.edit.insert(doc.uri, position, authDecorator);
+    //     codeActions.push(authAction);
+    //   }
+    //   return codeActions;
+    // }
+    provideCodeActions(doc, range, diagnostics) {
         const codeActions = [];
-        // Hardcoded secret detection fix
-        const action = new vscode.CodeAction('Replace with process.env.MY_SECRET', vscode.CodeActionKind.QuickFix);
-        action.edit = new vscode.WorkspaceEdit();
-        // Get the text of the line with the hardcoded secret
-        const lineText = doc.getText(new vscode.Range(range.start, range.end));
-        // If it’s a hardcoded secret, suggest replacing it
-        if (lineText.includes('Bearer') || lineText.includes('API_KEY')) {
-            action.edit.replace(doc.uri, range, 'process.env.MY_SECRET');
-            codeActions.push(action);
-        }
-        // Missing authorization check fix
-        const authAction = new vscode.CodeAction('Add @login_required', vscode.CodeActionKind.QuickFix);
-        authAction.edit = new vscode.WorkspaceEdit();
-        // For missing auth checks in Flask routes
-        if (lineText.includes('@app.route') && !lineText.includes('@login_required')) {
-            const authDecorator = '@login_required\n';
-            const position = new vscode.Position(0, 0); // Add to the top of the function
-            authAction.edit.insert(doc.uri, position, authDecorator);
-            codeActions.push(authAction);
-        }
+        diagnostics.forEach(diag => {
+            if (!range.intersection(diag.range))
+                return;
+            // Hardcoded secret fix
+            if (diag.message.includes('hardcoded') || diag.message.includes('API_KEY') || diag.message.includes('Bearer')) {
+                const action = new vscode.CodeAction('Replace with process.env.MY_SECRET', vscode.CodeActionKind.QuickFix);
+                action.edit = new vscode.WorkspaceEdit();
+                action.edit.replace(doc.uri, diag.range, 'process.env.MY_SECRET');
+                codeActions.push(action);
+            }
+            // Missing authorization fix
+            if (diag.message.includes('authorization') && doc.getText(diag.range).includes('@app.route')) {
+                const action = new vscode.CodeAction('Add @login_required', vscode.CodeActionKind.QuickFix);
+                action.edit = new vscode.WorkspaceEdit();
+                action.edit.insert(doc.uri, new vscode.Position(diag.range.start.line, 0), '@login_required\n');
+                codeActions.push(action);
+            }
+        });
         return codeActions;
     }
 }

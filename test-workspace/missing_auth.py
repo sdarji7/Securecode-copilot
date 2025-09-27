@@ -3,4 +3,4 @@ app = Flask(__name__)
 
 @app.route("/admin")
 def admin_panel():
-    return "Sensitive adminpanel"
+    return "Sensitive admin panel"

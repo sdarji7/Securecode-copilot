@@ -64,14 +64,24 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   // Registering Code Action Provider (Quick Fixes)
+  // context.subscriptions.push(
+  //   vscode.languages.registerCodeActionsProvider('python', {
+  //     provideCodeActions: async (doc: vscode.TextDocument, range: vscode.Range) => {
+  //       const findings = await runner.scanFile(doc);
+  //       return runner.provideCodeActions(doc, range);  // Trigger code actions
+  //     }
+  //   })
+  // );
   context.subscriptions.push(
-    vscode.languages.registerCodeActionsProvider('python', {
-      provideCodeActions: async (doc: vscode.TextDocument, range: vscode.Range) => {
-        const findings = await runner.scanFile(doc);
-        return runner.provideCodeActions(doc, range);  // Trigger code actions
-      }
-    })
+      vscode.languages.registerCodeActionsProvider('python', {
+          provideCodeActions: async (doc: vscode.TextDocument, range: vscode.Range) => {
+              // Get diagnostics for this document
+              const docDiagnostics = vscode.languages.getDiagnostics(doc.uri);
+              return runner.provideCodeActions(doc, range, docDiagnostics);
+          }
+      })
   );
+
 
   // Command: Enrich Prompt
   const enrichCmd = vscode.commands.registerCommand('securecode.enrichPrompt', async () => {

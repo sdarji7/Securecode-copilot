@@ -22,7 +22,7 @@ export class ScanManager {
     this.runner = new SemgrepRunner(channel);
   }
 
-  public scheduleScan(doc: vscode.TextDocument, delayMs = 600): void {
+  public scheduleScan(doc: vscode.TextDocument, delayMs = 300): void {
     if (doc.uri.scheme !== 'file') { return; }
     clearTimeout(this.debounceTimer as unknown as number);
     this.debounceTimer = setTimeout(() => this.runSemgrep(doc), delayMs);
