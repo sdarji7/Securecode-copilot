@@ -51,7 +51,27 @@ function activate(context) {
     const runner = new semgrep_1.SemgrepRunner(channel); // Initialize SemgrepRunner for quick fixes
     channel.appendLine('SecureCode Copilot: activated (Step 2 — Semgrep).');
     // Hooks
-    context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(e => scanner.scheduleScan(e.document, 700)), vscode.workspace.onDidSaveTextDocument(doc => scanner.scheduleScan(doc, 100)));
+    context.subscriptions.push(vscode.workspace.onDidOpenTextDocument(doc => scanner.scheduleScan(doc, 100)), vscode.workspace.onDidChangeTextDocument(e => scanner.scheduleScan(e.document, 50)), vscode.workspace.onDidSaveTextDocument(doc => scanner.scheduleScan(doc, 50)));
+    // Register a command to refresh Semgrep diagnostics
+    context.subscriptions.push(vscode.commands.registerCommand('securecode.refreshSemgrep', async (uri) => {
+        try {
+            const doc = await vscode.workspace.openTextDocument(uri);
+            scanner.scheduleScan(doc, 0); // schedule immediate scan
+        }
+        catch (e) {
+            channel.appendLine(`[refreshSemgrep] failed: ${e.message}`);
+        }
+    }));
+    // context.subscriptions.push(
+    //     vscode.commands.registerCommand('undo', () => {
+    //         const editor = vscode.window.activeTextEditor;
+    //         if (editor) scanner.scheduleScan(editor.document, 0); // immediate scan
+    //     }),
+    //     vscode.commands.registerCommand('redo', () => {
+    //         const editor = vscode.window.activeTextEditor;
+    //         if (editor) scanner.scheduleScan(editor.document, 0); // immediate scan
+    //     })
+    // );
     // Registering Code Action Provider (Quick Fixes)
     // context.subscriptions.push(
     //   vscode.languages.registerCodeActionsProvider('python', {

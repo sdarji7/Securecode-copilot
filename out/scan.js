@@ -26,7 +26,10 @@ class ScanManager {
     }
     async runSemgrep(doc) {
         try {
+            const version = doc.version; // store current document version
             const findings = await this.runner.scanFile(doc);
+            if (doc.version !== version)
+                return; // document changed during async scan
             const cfg = vscode.workspace.getConfiguration();
             const changedOnly = cfg.get('securecode.scanChangedLinesOnly', true);
             const text = doc.getText();
