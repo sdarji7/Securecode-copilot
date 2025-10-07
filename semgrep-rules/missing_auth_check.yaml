@@ -1,7 +1,12 @@
 rules:
   - id: missing-authorization
-    pattern-either:
+    patterns:
       - pattern: |
+          @app.route($ROUTE)
+          def $FUNC(...):
+              ...
+      - pattern-not: |
+          @login_required
           @app.route($ROUTE)
           def $FUNC(...):
               ...

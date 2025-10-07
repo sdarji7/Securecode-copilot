@@ -30,32 +30,32 @@ export class ScanManager {
 
   private async runSemgrep(doc: vscode.TextDocument): Promise<void> {
     try {
-      const version = doc.version; // store current document version
+      const version = doc.version;
       const findings = await this.runner.scanFile(doc);
-      if (doc.version !== version) return; // document changed during async scan
-      const cfg = vscode.workspace.getConfiguration();
-      const changedOnly = cfg.get<boolean>('securecode.scanChangedLinesOnly', true);
-
-      const text = doc.getText();
-      const hash = this.simpleHash(text);
-      const prev = this.lastTextHash.get(doc.uri.fsPath);
-      this.lastTextHash.set(doc.uri.fsPath, hash);
+      
+      // Document changed during scan, abort
+      if (doc.version !== version) return;
 
       const diags: vscode.Diagnostic[] = [];
+      
       for (const f of findings) {
         if (f.path !== doc.uri.fsPath) continue;
+        
         const startLine = Math.max(0, (f.start.line || 1) - 1);
         const endLine = Math.max(0, (f.end.line || f.start.line || 1) - 1);
         const start = new vscode.Position(startLine, Math.max(0, (f.start.col || 1) - 1));
         const end = new vscode.Position(endLine, Math.max(0, (f.end.col || 1) - 1));
         const range = new vscode.Range(start, end);
-        if (changedOnly && prev && prev === hash) continue;
+        
         const d = new vscode.Diagnostic(range, f.extra.message, mapSeverity(f.extra.severity));
         d.source = `Semgrep (${f.check_id})`;
         diags.push(d);
       }
+      
+      // Set all diagnostics at once (after loop completes)
       this.diagnostics.set(doc.uri, diags);
       this.channel.appendLine(`[scan] ${doc.fileName}: ${diags.length} semgrep findings.`);
+      
     } catch (e: any) {
       this.channel.appendLine(`[scan] failed: ${e.message}`);
     }

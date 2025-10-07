@@ -15,12 +15,15 @@
     "onStartupFinished",
     "onLanguage:javascript",
     "onLanguage:typescript",
-    "onLanguage:python",
-    "onCommand:securecode.enrichPrompt"
+    "onLanguage:python"
   ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
+      {
+        "command": "securecode.applyLlmFix",
+        "title": "Apply AI Security Fix"
+      },
       {
         "command": "securecode.enrichPrompt",
         "title": "Secure Prompt: Enrich Selected Prompt"
