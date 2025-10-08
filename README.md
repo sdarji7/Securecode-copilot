@@ -11,3 +11,6 @@
 - `securecode.semgrepPath`: path to the `semgrep` binary
 - `securecode.rulesDir`: directory of rules (defaults to the extension's `semgrep-rules`)
 - `securecode.scanChangedLinesOnly`: scan only when file content has changed since last run
+- `securecode.applyLlmFix`: calls AI assistant(currently dummy AI) for code refactoring/fixing
+
+Edited: I have added new branch **updated-securecode-copilot** which catches vulnerabilites and dummy AI assistant which fixes vulnerable/Insecure code on hovering(Tooltip shows what is vulnerable in code) over to vulnerable code and clicking on quick fix.
